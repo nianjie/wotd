@@ -1,11 +1,11 @@
 {
   "name": "word-of-the-day",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "a tiny Node.js app providing tiny helps for foreign language learners like the author.",
   "main": "server.js",
   "scripts": {
-      "start": "node server.js",
-      "remote-debug": "node --inspect --debug-brk server.js"
+    "start": "node server.js",
+    "remote-debug": "node --inspect --debug-brk server.js"
   },
   "dependencies": {
     "firebase": "^3.6.4",
