@@ -128,7 +128,10 @@ function wotd(req) {
 	return latestsnap.val();
     }).then(function(latest) {
 	if (!latest) {
-	    throw new Error('Couldn\'t get value saved under latest.');
+	    // deal with the case the latest word not exist yet,
+	    // and if so null instead of exception is returned.
+	    console.log(`No value saved under the latest:${location}.`);
+	    return null;
 	}
 	return root.child('word').child(latest).once('value').then(function(wordsnap) {
 	    return wordsnap.val();
