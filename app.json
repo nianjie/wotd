@@ -1,0 +1,30 @@
+{
+  "name": "word-of-the-day",
+  "description": "a tiny Node.js app providing tiny helps for foreign language learners like the author.",
+  "scripts": {
+  },
+  "env": {
+    "FIRE_CEMAIL": {
+      "required": true
+    },
+    "FIRE_PID": {
+      "required": true
+    },
+    "FIRE_PKEY": {
+      "required": true
+    }
+  },
+  "formation": {
+    "web": {
+      "quantity": 1
+    }
+  },
+  "addons": [
+
+  ],
+  "buildpacks": [
+    {
+      "url": "heroku/nodejs"
+    }
+  ]
+}
