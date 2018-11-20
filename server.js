@@ -86,7 +86,13 @@ function getrss() {
     .then(res => res.body.read())
     .then(body => Promise.resolve({
       then(onFullfill, onReject) {
-        return parser.parseString(body, onFullfill, onReject);
+        parser.parseString(body, (error, result) => {
+          if (error) {
+            onReject(error);
+          } else {
+            onFullfill(result);
+          }
+        });
       },
     }))
     .done((xmlobj) => {
