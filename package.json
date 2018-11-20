@@ -10,7 +10,6 @@
   "dependencies": {
     "firebase": "^3.6.4",
     "firebase-admin": "^4.0.4",
-    "q": "1.4.1",
     "q-io": "1.13.2",
     "xml2js": "0.4.16"
   },

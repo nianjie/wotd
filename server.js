@@ -84,6 +84,9 @@ function getDef(summary) {
 function getrss() {
   return HTTP.request(rssURL)
     .then(res => res.body.read())
+    // Here the parser, a dependent 3rd lib, makes use of the Node.js callback pattern,
+    // where callbacks are in the form of function(err, result).
+    // Wrapping as thenable so make it support promise.
     .then(body => Promise.resolve({
       then(onFullfill, onReject) {
         parser.parseString(body, (error, result) => {
@@ -96,16 +99,12 @@ function getrss() {
       },
     }))
     .done((xmlobj) => {
-      // save to firebase
-      // year, month and date of today
+      // save to firebase under location of ROOT/year/month/date
       const today = new Date();
-      const year = today.getUTCFullYear();
-      const month = today.getUTCMonth();
-      const date = today.getUTCDate();
-      const location = `${year}/${month}/${date}`;
+      const location = `${today.getUTCFullYear()}/${today.getUTCMonth()}/${today.getUTCDate()}`; // eslint-disable-line
       xmlobj.feed.entry.forEach((e) => {
         if (isWordOfTheDay(e, today)) {
-        // save the word under chronological
+          // save the word under chronological
           root.child(`chronological/${location}/`).set(`${e.title[0]}`);
           // then save other detail attributes under word
           root.child(`word/${e.title[0]}`).once('value')
@@ -137,8 +136,8 @@ function wotd() {
     .then(latestsnap => latestsnap.val())
     .then((latest) => {
       if (!latest) {
-      // deal with the case the latest word not exist yet,
-      // and if so null instead of exception is returned.
+        // deal with the case the latest word not exist yet,
+        // and if so null instead of exception is returned.
         console.log(`No value saved under the latest:${location}.`);
         return null;
       }
