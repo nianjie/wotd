@@ -1,4 +1,3 @@
-const Q = require('q');
 const HTTP = require('q-io/http');
 const APPS = require('q-io/http-apps');
 const xml2js = require('xml2js');
@@ -85,7 +84,11 @@ function getDef(summary) {
 function getrss() {
   return HTTP.request(rssURL)
     .then(res => res.body.read())
-    .then(body => Q.npost(parser, 'parseString', [body]))
+    .then(body => Promise.resolve({
+      then(onFullfill, onReject) {
+        return parser.parseString(body, onFullfill, onReject);
+      },
+    }))
     .done((xmlobj) => {
       // save to firebase
       // year, month and date of today
