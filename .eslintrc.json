@@ -1,0 +1,10 @@
+{
+    "extends": "airbnb-base",
+    "rules":{
+        "max-len": ["error", {
+            "ignoreComments": true
+        }],
+        "no-console": "off",
+        "import/no-unresolved": "off"
+    }
+}
