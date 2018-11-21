@@ -178,6 +178,7 @@ function randomWOTD(counter = 0) {
   const month = getRandomIntInclusive(0, today.getUTCMonth);
   const day = getRandomIntInclusive(1, today.getUTCDate);
   const location = `${year}/${month}/${day}`;
+  console.log(`random access to ${location}.`);
   return root.child(`chronological/${location}`)
     .once('value')
     .then((snap) => {
