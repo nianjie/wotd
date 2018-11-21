@@ -29,6 +29,10 @@ function getDef(summary) {
   return summary;
 }
 
+function getRandomIntInclusive(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min; // The maximum is inclusive and the minimum is inclusive
+}
+
 //
 // schema B
 // WOTD
@@ -37,20 +41,20 @@ function getDef(summary) {
 //    |  |
 //    |  |-2017
 //    |  |    |
-//    |  |    |-01
+//    |  |    |-0
 //    |  |    | |
-//    |  |    | |-01
+//    |  |    | |-1
 //    |  |    | | |-word A
 //    |  |    | |
-//    |  |    | |-02
+//    |  |    | |-2
 //    |  |    | | |-word B
 //    |  |    | |
 //    |  |    | |-...
 //    |  |    |   |-word C
 //    |  |    |
-//    |  |    |-02
+//    |  |    |-1
 //    |  |    | |
-//    |  |    | |-01
+//    |  |    | |-1
 //    |  |    | | |-word D
 //    |  |    | |
 //    |  |    | |-...
@@ -164,7 +168,37 @@ function wotdCount() {
   return APPS.ok('number of count of words will be the result.');
 }
 
-// By applying combination of Chain and Branch together, it's nicely easy to build a lightweight API that can be deployed or attached to any path route.
+function randomWOTD(counter = 0) {
+  console.log(`randomWOTD start[${counter}].`);
+  if (counter > 10) {
+    throw new Error('random too many times.');
+  }
+  const today = new Date();
+  const year = getRandomIntInclusive(2017, today.getUTCFullYear());
+  const month = getRandomIntInclusive(0, today.getUTCMonth());
+  const day = getRandomIntInclusive(1, today.getUTCDate());
+  const location = `${year}/${month}/${day}`;
+  console.log(`random access to ${location}.`);
+  return root.child(`chronological/${location}`)
+    .once('value')
+    .then((snap) => {
+      if (snap.exists()) {
+        return snap.val();
+      }
+      return randomWOTD(counter + 1); // recursively call randomWOTD till either exceed maximum rounds or find a location word being available
+    });
+}
+
+function wotdRandom() {
+  return randomWOTD()
+    .then(word => root.child(`word/${word}`).once('value'))
+    .then(wordsnap => wordsnap.val())
+    .then(word => APPS.json(word))
+    .catch(reason => APPS.ok(`Opps! Something is wrong : ${reason}`));
+}
+
+// By applying combination of Chain and Branch together,
+// it's nicely easy to build a lightweight API that can be deployed or attached to any path route.
 // The following code snippet constructs an API that has a following structure:
 // WOTD API
 //        |_/.
@@ -172,12 +206,14 @@ function wotdCount() {
 //        |__/chronological
 //        |__/alphabetical
 //        |__/count
+//        |__/random
 const wotdAPI = APPS.Chain()
   .use(APPS.Cap, APPS.Branch({
     all: wotdAll,
     chronological: wotdChronological,
     alphabetical: wotdAlphabetical,
     count: wotdCount,
+    random: wotdRandom,
   }))
   .end(wotd);
 
