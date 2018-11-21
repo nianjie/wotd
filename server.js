@@ -185,7 +185,7 @@ function randomWOTD(counter = 0) {
       if (snap.exists()) {
         return snap.val();
       }
-      return randomWOTD(counter + 1);
+      return randomWOTD(counter + 1); // recursively call randomWOTD till either exceed maximum rounds or find a location word being available
     });
 }
 
@@ -206,6 +206,7 @@ function wotdRandom() {
 //        |__/chronological
 //        |__/alphabetical
 //        |__/count
+//        |__/random
 const wotdAPI = APPS.Chain()
   .use(APPS.Cap, APPS.Branch({
     all: wotdAll,
