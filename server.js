@@ -12,7 +12,6 @@ const firebaseApp = fireAdmin.initializeApp({
 });
 const root = firebaseApp.database().ref();
 
-const rssURL = 'http://feeds.feedburner.com/OLD-WordOfTheDay';
 const port = process.env.PORT || 0;
 
 function isWordOfTheDay(e, today) {
@@ -81,8 +80,8 @@ function getDef(summary) {
 // +) easy to track down words by dates
 // +) give no chance to ignore word that has previously been appeared
 // -) need efforts to implement
-function getrss() {
-  return HTTP.request(rssURL)
+function readFeedFrom(feedurl) {
+  return HTTP.request(feedurl)
     .then(res => res.body.read())
     // Here the parser, a dependent 3rd lib, makes use of the Node.js callback pattern,
     // where callbacks are in the form of function(err, result).
@@ -128,9 +127,9 @@ function getrss() {
  */
 function wotd() {
   const today = new Date();
-  const year = today.getUTCFullYear(); const month = today.getUTCMonth(); const
-    date = today.getUTCDate();
-  const location = `${year}/${month}/${date}`;
+  // construct location upon date, where word is saved.
+  // however more details are saved under the location in which constructure the word self is part of.
+  const location = `${today.getUTCFullYear()}/${today.getUTCMonth()}/${today.getUTCDate()}`; // eslint-disable-line
   return root.child(`chronological/${location}`)
     .once('value')
     .then(latestsnap => latestsnap.val())
@@ -193,7 +192,9 @@ const server = HTTP.Server(app);
 
 server.listen(port).then((lserver) => {
   console.log(`Application is listening on port:${lserver.address().port}.`);
-  getrss();
+  // Oxford Learner's Dictionaries Feed
+  const OLDFeed = 'http://feeds.feedburner.com/OLD-WordOfTheDay';
+  readFeedFrom(OLDFeed);
 }).catch((reason) => {
   // all un-caught error should come here
   console.log(`error[system] : ${reason}`);
