@@ -174,9 +174,9 @@ function randomWOTD(counter = 0) {
     throw new Error('random too many times.');
   }
   const today = new Date();
-  const year = getRandomIntInclusive(2017, today.getUTCFullYear);
-  const month = getRandomIntInclusive(0, today.getUTCMonth);
-  const day = getRandomIntInclusive(1, today.getUTCDate);
+  const year = getRandomIntInclusive(2017, today.getUTCFullYear());
+  const month = getRandomIntInclusive(0, today.getUTCMonth());
+  const day = getRandomIntInclusive(1, today.getUTCDate());
   const location = `${year}/${month}/${day}`;
   console.log(`random access to ${location}.`);
   return root.child(`chronological/${location}`)
