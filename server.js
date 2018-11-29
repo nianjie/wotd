@@ -165,7 +165,11 @@ function wotdAlphabetical() {
 }
 
 function wotdCount() {
-  return APPS.ok('number of count of words will be the result.');
+  return root.child('word')
+    .once('value')
+    .then(snap => snap.numChildren())
+    .then(num => APPS.json(num))
+    .catch(reason => APPS.ok(`Opps! Something is wrong : ${reason}`));
 }
 
 function randomWOTD(counter = 0) {
