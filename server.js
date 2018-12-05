@@ -216,7 +216,7 @@ const wotdAPI = APPS.Chain()
     all: wotdAll,
     chronological: APPS.Chain()
       .use(APPS.Cap, wotdChronological)
-      .end(APPS.ok('specify the date in URL.')),
+      .end(() => APPS.ok('specify the date in URL.')),
     alphabetical: wotdAlphabetical,
     count: wotdCount,
     random: wotdRandom,
