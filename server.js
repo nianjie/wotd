@@ -163,6 +163,7 @@ function normaliseDate(dateURI) {
       segs = [...segs, '0', '1'];
       break;
     case 3:
+      segs[2] = parseInt(segs[2], 10) - 1;
       segs = [...segs, '1'];
       break;
     default:
