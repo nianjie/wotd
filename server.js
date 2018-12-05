@@ -172,14 +172,32 @@ function normaliseDate(dateURI) {
     default:
       break;
   }
-  segs[2] = parseInt(segs[2], 10) % 12 - 1; // month value is between 0 and 11.
-  [, ...segs] = segs;
+  segs[2] = (parseInt(segs[2], 10) % 12) - 1; // month value is between 0 and 11.
+  segs[3] = parseInt(segs[3], 10) % 31; // date value is an integer between 1 and 31.
+  [, ...segs] = segs; // reduce the segs[0]( equal '').
   return new Date(...segs);
 }
 
 function wotdChronological(req) {
-  const date = normaliseDate(req.pathInfo);
-  return APPS.ok(`request for date of ${date.toLocaleDateString()}`);
+  const today = normaliseDate(req.pathInfo);
+  const location = `${today.getUTCFullYear()}/${today.getUTCMonth()}/${today.getUTCDate()}`; // eslint-disable-line
+  console.log(`request for word saved under ${location}`);
+  return root.child(`chronological/${location}`)
+    .once('value')
+    .then(latestsnap => latestsnap.val())
+    .then((latest) => {
+      if (!latest) {
+        // deal with the case the latest word not exist yet,
+        // and if so null instead of exception is returned.
+        console.log(`No value saved under :${location}.`);
+        return null;
+      }
+      return root.child('word')
+        .child(latest)
+        .once('value')
+        .then(wordsnap => wordsnap.val());
+    })
+    .then(word => APPS.json(word));
 }
 
 function wotdAlphabetical() {
