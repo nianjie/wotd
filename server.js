@@ -164,7 +164,7 @@ function normaliseDate(dateURI) {
   console.log(`segs with value ${segs}`);
   switch (segs.length) {
     case 2:
-      segs = [...segs, '0', '1'];
+      segs = [...segs, '1', '1'];
       break;
     case 3:
       segs = [...segs, '1'];
