@@ -172,7 +172,7 @@ function normaliseDate(dateURI) {
     default:
       break;
   }
-  segs[2] = parseInt(segs[2], 10) - 1;
+  segs[2] = parseInt(segs[2], 10) % 12 - 1; // month value is between 0 and 11.
   [, ...segs] = segs;
   return new Date(...segs);
 }
