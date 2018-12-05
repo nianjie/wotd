@@ -156,8 +156,8 @@ function wotdAll() {
   return APPS.ok('all is awesome.');
 }
 
-function wotdChronological() {
-  return APPS.ok('chronological list will be the result.');
+function wotdChronological(req) {
+  return APPS.ok(`request for date of ${req.pathInfo}`);
 }
 
 function wotdAlphabetical() {
@@ -214,7 +214,9 @@ function wotdRandom() {
 const wotdAPI = APPS.Chain()
   .use(APPS.Cap, APPS.Branch({
     all: wotdAll,
-    chronological: wotdChronological,
+    chronological: APPS.Chain()
+      .use(APPS.Cap, wotdChronological)
+      .end(APPS.ok('specify the date in URL.')),
     alphabetical: wotdAlphabetical,
     count: wotdCount,
     random: wotdRandom,
