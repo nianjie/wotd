@@ -156,8 +156,25 @@ function wotdAll() {
   return APPS.ok('all is awesome.');
 }
 
+function normaliseDate(dateURI) {
+  let segs = dateURI.split('/');
+  switch (segs.length) {
+    case 2:
+      segs = [...segs, '0', '1'];
+      break;
+    case 3:
+      segs = [...segs, '1'];
+      break;
+    default:
+      break;
+  }
+  [, ...segs] = segs;
+  return new Date(...segs);
+}
+
 function wotdChronological(req) {
-  return APPS.ok(`request for date of ${req.pathInfo}`);
+  const date = normaliseDate(req.pathInfo);
+  return APPS.ok(`request for date of ${date.toLocaleDateString()}`);
 }
 
 function wotdAlphabetical() {
