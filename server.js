@@ -156,8 +156,12 @@ function wotdAll() {
   return APPS.ok('all is awesome.');
 }
 
+// complete date specified as URI if incompleted with default value,
+// then return it as a Date object.
+// dateURI always starts with '/'.
 function normaliseDate(dateURI) {
   let segs = dateURI.split('/');
+  console.log(`segs with value ${segs}`);
   switch (segs.length) {
     case 2:
       segs = [...segs, '0', '1'];
