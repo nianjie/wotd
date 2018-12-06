@@ -128,9 +128,9 @@ function readFeedFrom(feedurl) {
 
 /**
  * Fetch word of the day based on the strcture of Schema B.
+ * if no specific date is given, defual to today.
  */
-function wotd() {
-  const today = new Date();
+function wordOfTheDay(today = new Date()) {
   // construct location upon date, where word is saved.
   // however more details are saved under the location in which constructure the word self is part of.
   const location = `${today.getUTCFullYear()}/${today.getUTCMonth()}/${today.getUTCDate()}`; // eslint-disable-line
@@ -141,7 +141,7 @@ function wotd() {
       if (!latest) {
         // deal with the case the latest word not exist yet,
         // and if so null instead of exception is returned.
-        console.log(`No value saved under the latest:${location}.`);
+        console.log(`No value saved under :${location}.`);
         return null;
       }
       return root.child('word')
@@ -150,6 +150,10 @@ function wotd() {
         .then(wordsnap => wordsnap.val());
     })
     .then(word => APPS.json(word));
+}
+
+function wotd() {
+  return wordOfTheDay();
 }
 
 function wotdAll() {
@@ -180,24 +184,7 @@ function normaliseDate(dateURI) {
 
 function wotdChronological(req) {
   const today = normaliseDate(req.pathInfo);
-  const location = `${today.getUTCFullYear()}/${today.getUTCMonth()}/${today.getUTCDate()}`; // eslint-disable-line
-  console.log(`request for word saved under ${location}`);
-  return root.child(`chronological/${location}`)
-    .once('value')
-    .then(latestsnap => latestsnap.val())
-    .then((latest) => {
-      if (!latest) {
-        // deal with the case the latest word not exist yet,
-        // and if so null instead of exception is returned.
-        console.log(`No value saved under :${location}.`);
-        return null;
-      }
-      return root.child('word')
-        .child(latest)
-        .once('value')
-        .then(wordsnap => wordsnap.val());
-    })
-    .then(word => APPS.json(word));
+  return wordOfTheDay(today);
 }
 
 function wotdAlphabetical() {
