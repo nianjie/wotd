@@ -160,7 +160,7 @@ function wotdAll() {
   return APPS.ok('all is awesome.');
 }
 
-// complete date specified as URI if incompleted with default value,
+// complete date specified by URI if incompleted with default value,
 // then return it as a Date object.
 // dateURI always starts with '/'.
 function normaliseDate(dateURI) {
@@ -168,10 +168,10 @@ function normaliseDate(dateURI) {
   console.log(`segs with value ${segs}`);
   switch (segs.length) {
     case 2:
-      segs = [...segs, '1', '1'];
+      segs = [...segs, '1', '1']; // complete both of month and date
       break;
     case 3:
-      segs = [...segs, '1'];
+      segs = [...segs, '1']; // complete date
       break;
     default:
       break;
