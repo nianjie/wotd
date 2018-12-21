@@ -187,8 +187,15 @@ function wotdChronological(req) {
   return wordOfTheDay(today);
 }
 
-function wotdAlphabetical() {
-  return APPS.ok('alphabetical list will be the result.');
+function wotdAlphabetical(req) {
+  const words = req.pathInfo.split('/');
+  console.log(`requested words ${words}`);
+  const all = words.map(w => root.child('word')
+    .child(w)
+    .once('value')
+    .then(wordsnap => wordsnap.val()));
+  return Promise.all(all)
+    .then(list => APPS.json(list));
 }
 
 function wotdCount() {
@@ -244,7 +251,9 @@ const wotdAPI = APPS.Chain()
     chronological: APPS.Chain()
       .use(APPS.Cap, wotdChronological)
       .end(() => APPS.ok('specify the date in URL.')),
-    alphabetical: wotdAlphabetical,
+    alphabetical: APPS.Chain()
+      .use(APPS.Cap, wotdAlphabetical)
+      .end(() => APPS.ok('specify the words(separating with forward slashs) in URL')), // eslint-disable-line
     count: wotdCount,
     random: wotdRandom,
   }))
