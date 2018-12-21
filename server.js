@@ -188,8 +188,13 @@ function wotdChronological(req) {
 }
 
 function wotdAlphabetical(req) {
-  let words = req.pathInfo.split('/');
-  [,...words] = words; // reduce the words[0](equal '')
+  const words = req.pathInfo.split('/');
+  words.reduce((acc, w) => {
+    if (w.length > 0) { // exclude empty elements.
+      acc.push(w);
+    }
+    return acc;
+  }, []);
   console.log(`requested words ${words}`);
   const all = words.map(w => root.child('word')
     .child(w)
