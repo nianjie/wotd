@@ -188,8 +188,8 @@ function wotdChronological(req) {
 }
 
 function wotdAlphabetical(req) {
-  const words = req.pathInfo.split('/');
-  words.reduce((acc, w) => {
+  let words = req.pathInfo.split('/');
+  words = words.reduce((acc, w) => {
     if (w.length > 0) { // exclude empty elements.
       acc.push(w);
     }
@@ -201,7 +201,7 @@ function wotdAlphabetical(req) {
     .once('value')
     .then(wordsnap => wordsnap.val()));
   return Promise.all(all)
-    .then(list => APPS.json(list));
+    .then(definitions => APPS.json(definitions));
 }
 
 function wotdCount() {
