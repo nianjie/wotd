@@ -121,6 +121,9 @@ function readFeedFrom(feedurl) {
                 };
                 snap.ref.set(detail);
               }
+		else {
+		    cosole.log(`${e.title[0]} already exists.`);
+		}
             });
         }
       });
