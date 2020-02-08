@@ -22,6 +22,7 @@ function isWordOfTheDay(e, today) {
 }
 
 function getDef(summary) {
+  console.log(`<summary>: ${summary}`);
   let index = 0;
   if (summary && (index = summary.indexOf('<img src=')) > 0) { // eslint-disable-line
     return summary.substring(0, index);
