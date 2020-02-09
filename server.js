@@ -1,8 +1,7 @@
 const HTTP = require('q-io/http');
 const APPS = require('q-io/http-apps');
-const xml2js = require('xml2js');
 
-const parser = new xml2js.Parser();
+const feedReader = require('./readfeed');
 
 const fireAdmin = require('firebase-admin');
 
@@ -19,14 +18,6 @@ function isWordOfTheDay(e, today) {
   return updatedday.getUTCFullYear() === today.getUTCFullYear()
     && updatedday.getUTCMonth() === today.getUTCMonth()
     && updatedday.getUTCDate() === today.getUTCDate();
-}
-
-function getDef(summary) {
-  let index = 0;
-  if (summary && (index = summary.indexOf('<img src=')) > 0) { // eslint-disable-line
-    return summary.substring(0, index);
-  }
-  return summary;
 }
 
 function getRandomIntInclusive(min, max) {
@@ -85,22 +76,7 @@ function getRandomIntInclusive(min, max) {
 // +) give no chance to ignore word that has previously been appeared
 // -) need efforts to implement
 function readFeedFrom(feedurl) {
-  return HTTP.request(feedurl)
-    .then(res => res.body.read())
-    // Here the parser, a dependent 3rd lib, makes use of the Node.js callback pattern,
-    // where callbacks are in the form of function(err, result).
-    // Wrapping as thenable so make it support promise.
-    .then(body => Promise.resolve({
-      then(onFullfill, onReject) {
-        parser.parseString(body, (error, result) => {
-          if (error) {
-            onReject(error);
-          } else {
-            onFullfill(result);
-          }
-        });
-      },
-    }))
+  return feedReader.readFrom(feedurl)
     .done((xmlobj) => {
       // save to firebase under location of ROOT/year/month/date
       const today = new Date();
