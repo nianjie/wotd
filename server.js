@@ -113,10 +113,13 @@ function readFeedFrom(feedurl) {
           root.child(`word/${e.title[0]}`).once('value')
             .then((snap) => {
               if (!snap.exists()) {
+                const updated = e.updated[0];
+                const link = e['feedburner:origLink'][0];
+                const definition = e.title[0];
                 const detail = {
-                  updated: e.updated[0],
-                  link: e['feedburner:origLink'][0],
-                  definition: getDef(e.summary[0]._) === 'null' ? e.title[0] : getDef(e.summary[0]._), // eslint-disable-line max-len
+                  updated,
+                  link,
+                  definition
                 };
                 snap.ref.set(detail);
               }
