@@ -116,7 +116,7 @@ function readFeedFrom(feedurl) {
                 const detail = {
                   updated: e.updated[0],
                   link: e['feedburner:origLink'][0],
-                  definition: getDef(e.summary[0]._) == 'null' ? e.title[0] : getDef(e.summary[0]._),
+                  definition: getDef(e.summary[0]._) === 'null' ? e.title[0] : getDef(e.summary[0]._), // eslint-disable-line max-len
                 };
                 snap.ref.set(detail);
               }
