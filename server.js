@@ -77,7 +77,7 @@ function getRandomIntInclusive(min, max) {
 // -) need efforts to implement
 function readFeedFrom(feedurl) {
   return feedReader.readFrom(feedurl)
-    .done((xmlobj) => {
+    .then((xmlobj) => {
       // save to firebase under location of ROOT/year/month/date
       const today = new Date();
       const location = `${today.getUTCFullYear()}/${today.getUTCMonth()}/${today.getUTCDate()}`; // eslint-disable-line
@@ -102,6 +102,9 @@ function readFeedFrom(feedurl) {
             });
         }
       });
+    })
+    .catch((reason) => {
+      console.log(`Reading rss feed faild. Because ${reason}`);
     });
 }
 
