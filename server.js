@@ -3,7 +3,7 @@ const APPS = require('q-io/http-apps');
 
 const fireAdmin = require('firebase-admin');
 
-import feedReader from './readfeed.js'; // eslint-disable-line import/order,import/first,import/extensions
+const feedReader = require('./readfeed');
 
 const firebaseApp = fireAdmin.initializeApp({
   databaseURL: 'https://newwotd.firebaseio.com/',
