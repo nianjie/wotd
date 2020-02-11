@@ -25,4 +25,4 @@ const readFeed = {
   },
 };
 
-module.exports = readFeed;
+export default exports = readFeed;

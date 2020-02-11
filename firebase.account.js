@@ -6,4 +6,4 @@ const serviceAccount = {
   client_email: process.env.FIRE_CEMAIL,
 };
 
-export default exports = serviceAccount;
+module.exports = serviceAccount;
