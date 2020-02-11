@@ -1,10 +1,9 @@
-import HTTP from 'q-io/http';
+const HTTP = require('q-io/http');
+const APPS = require('q-io/http-apps');
 
-import APPS from 'q-io/http-apps';
+const fireAdmin = require('firebase-admin');
 
-import fireAdmin from 'firebase-admin';
-
-import feedReader from './readfeed';
+import feedReader from './readfeed'; // eslint-disable-line import/order,import/first
 
 const firebaseApp = fireAdmin.initializeApp({
   databaseURL: 'https://newwotd.firebaseio.com/',
