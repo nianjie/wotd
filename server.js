@@ -1,8 +1,7 @@
 const HTTP = require('q-io/http');
 const APPS = require('q-io/http-apps');
-const xml2js = require('xml2js');
 
-const parser = new xml2js.Parser();
+const feedReader = require('./readfeed');
 
 const fireAdmin = require('firebase-admin');
 
@@ -19,14 +18,6 @@ function isWordOfTheDay(e, today) {
   return updatedday.getUTCFullYear() === today.getUTCFullYear()
     && updatedday.getUTCMonth() === today.getUTCMonth()
     && updatedday.getUTCDate() === today.getUTCDate();
-}
-
-function getDef(summary) {
-  let index = 0;
-  if (summary && (index = summary.indexOf('<img src=')) > 0) { // eslint-disable-line
-    return summary.substring(0, index);
-  }
-  return summary;
 }
 
 function getRandomIntInclusive(min, max) {
@@ -85,23 +76,8 @@ function getRandomIntInclusive(min, max) {
 // +) give no chance to ignore word that has previously been appeared
 // -) need efforts to implement
 function readFeedFrom(feedurl) {
-  return HTTP.request(feedurl)
-    .then(res => res.body.read())
-    // Here the parser, a dependent 3rd lib, makes use of the Node.js callback pattern,
-    // where callbacks are in the form of function(err, result).
-    // Wrapping as thenable so make it support promise.
-    .then(body => Promise.resolve({
-      then(onFullfill, onReject) {
-        parser.parseString(body, (error, result) => {
-          if (error) {
-            onReject(error);
-          } else {
-            onFullfill(result);
-          }
-        });
-      },
-    }))
-    .done((xmlobj) => {
+  return feedReader.readFrom(feedurl)
+    .then((xmlobj) => {
       // save to firebase under location of ROOT/year/month/date
       const today = new Date();
       const location = `${today.getUTCFullYear()}/${today.getUTCMonth()}/${today.getUTCDate()}`; // eslint-disable-line
@@ -113,16 +89,22 @@ function readFeedFrom(feedurl) {
           root.child(`word/${e.title[0]}`).once('value')
             .then((snap) => {
               if (!snap.exists()) {
+                const updated = e.updated[0];
+                const link = e['feedburner:origLink'][0];
+                const definition = e.title[0];
                 const detail = {
-                  updated: e.updated[0],
-                  link: e['feedburner:origLink'][0],
-                  definition: getDef(e.summary[0]._) === 'null' ? e.title[0] : getDef(e.summary[0]._), // eslint-disable-line max-len
+                  updated,
+                  link,
+                  definition
                 };
                 snap.ref.set(detail);
               }
             });
         }
       });
+    })
+    .catch((reason) => {
+      console.log(`Reading rss feed faild. Because ${reason}`);
     });
 }
 

@@ -6,4 +6,4 @@ var serviceAccount = {
     "client_email": process.env.FIRE_CEMAIL
 };
 
-module.exports = exports = serviceAccount;
+module.exports = serviceAccount;
