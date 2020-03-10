@@ -1,9 +1,8 @@
 const HTTP = require('q-io/http');
 const APPS = require('q-io/http-apps');
+const fireAdmin = require('firebase-admin');
 
 const feedReader = require('./readfeed');
-
-const fireAdmin = require('firebase-admin');
 
 const firebaseApp = fireAdmin.initializeApp({
   databaseURL: 'https://newwotd.firebaseio.com/',
@@ -95,7 +94,7 @@ function readFeedFrom(feedurl) {
                 const detail = {
                   updated,
                   link,
-                  definition
+                  definition,
                 };
                 snap.ref.set(detail);
               }
