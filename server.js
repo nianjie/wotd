@@ -229,6 +229,7 @@ function wotdRandom() {
 //        |_/.
 //        |__/all
 //        |__/chronological
+//            |__/today
 //        |__/alphabetical
 //        |__/count
 //        |__/random
@@ -237,6 +238,9 @@ const wotdAPI = APPS.Chain()
     all: wotdAll,
     chronological: APPS.Chain()
       .use(APPS.Cap, wotdChronological)
+      .use(APPS.Cap, next => APPS.Branch({
+        today: () => wordOfTheDay(),
+      }, next))
       .end(() => APPS.ok('specify the date in URL.')),
     alphabetical: APPS.Chain()
       .use(APPS.Cap, wotdAlphabetical)
