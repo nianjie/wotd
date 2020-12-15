@@ -255,7 +255,7 @@ const app = APPS.Chain()
   .use(() => APPS.Branch({
     wotd: wotdAPI,
   }))
-  .end(APPS.notFound);
+  .end();
 
 const server = HTTP.Server(app);
 
