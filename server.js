@@ -137,10 +137,6 @@ function wotd() {
   return wordOfTheDay();
 }
 
-function wotdAll() {
-  return APPS.ok('all is awesome.');
-}
-
 // complete date specified by URI if incompleted with default value,
 // then return it as a Date object.
 // dateURI always starts with '/'.
@@ -185,13 +181,6 @@ function wotdAlphabetical(req) {
     .then(definitions => APPS.json(definitions));
 }
 
-function wotdCount() {
-  return root.child('word')
-    .once('value')
-    .then(snap => snap.numChildren())
-    .then(num => APPS.json(num))
-    .catch(reason => APPS.ok(`Opps! Something is wrong : ${reason}`));
-}
 
 function randomWOTD(counter = 0) {
   console.log(`randomWOTD start[${counter}].`);
@@ -214,7 +203,40 @@ function randomWOTD(counter = 0) {
     });
 }
 
-function wotdRandom() {
+// Response to ROOT/all
+function wotdAllBranch() {
+  return APPS.ok('all is awesome.');
+}
+
+// Response to ROOT/chronological
+// If no further path or ending with /,
+// APPS.ok is invoked to show usage tips;
+// otherwise the rest is processed like below:
+// if it starts with today/(including end up with today),
+// then wotd is invoked,
+// otherwise wotdChronological.
+const chronologicalBranch = APPS.Chain()
+  .use(APPS.Cap, APPS.Branch({
+    today: wotd,
+  }, wotdChronological))
+  .end(() => APPS.ok('specify the date in URL.'));
+
+// Response to ROOT/alphabetical
+const alphabeticalBranch = APPS.Chain()
+  .use(APPS.Cap, wotdAlphabetical)
+  .end(() => APPS.ok('specify the words(separating with forward slashs) in URL')); // eslint-disable-line
+
+// Response to ROOT/count
+function wotdCountBranch() {
+  return root.child('word')
+    .once('value')
+    .then(snap => snap.numChildren())
+    .then(num => APPS.json(num))
+    .catch(reason => APPS.ok(`Opps! Something is wrong : ${reason}`));
+}
+
+// Response to ROOT/random
+function wotdRandomBranch() {
   return randomWOTD()
     .then(word => root.child(`word/${word}`).once('value'))
     .then(wordsnap => wordsnap.val())
@@ -229,29 +251,27 @@ function wotdRandom() {
 //        |_/.
 //        |__/all
 //        |__/chronological
+//            |__/today
+//            |__/YYYY/MM/DD
 //        |__/alphabetical
 //        |__/count
 //        |__/random
 const wotdAPI = APPS.Chain()
   .use(APPS.Cap, APPS.Branch({
-    all: wotdAll,
-    chronological: APPS.Chain()
-      .use(APPS.Cap, wotdChronological)
-      .end(() => APPS.ok('specify the date in URL.')),
-    alphabetical: APPS.Chain()
-      .use(APPS.Cap, wotdAlphabetical)
-      .end(() => APPS.ok('specify the words(separating with forward slashs) in URL')), // eslint-disable-line
-    count: wotdCount,
-    random: wotdRandom,
+    all: wotdAllBranch,
+    chronological: chronologicalBranch,
+    alphabetical: alphabeticalBranch,
+    count: wotdCountBranch,
+    random: wotdRandomBranch,
   }))
   .end(wotd);
 
 const app = APPS.Chain()
   .use(APPS.Log)
-  .use(next => APPS.Branch({
+  .use(APPS.Branch)
+  .end({
     wotd: wotdAPI,
-  }, next))
-  .end(APPS.notFound);
+  });
 
 const server = HTTP.Server(app);
 
