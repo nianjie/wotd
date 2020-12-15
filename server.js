@@ -237,10 +237,9 @@ const wotdAPI = APPS.Chain()
   .use(APPS.Cap, APPS.Branch({
     all: wotdAll,
     chronological: APPS.Chain()
-      .use(APPS.Cap, wotdChronological)
-      .use(APPS.Cap, next => APPS.Branch({
-        today: () => wordOfTheDay(),
-      }, next))
+      .use(APPS.Cap, APPS.Branch({
+        today: wotd,
+      }, wotdChronological))
       .end(() => APPS.ok('specify the date in URL.')),
     alphabetical: APPS.Chain()
       .use(APPS.Cap, wotdAlphabetical)
