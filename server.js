@@ -221,12 +221,12 @@ const chronologicalBranch = APPS.Chain()
   }, wotdChronological))
   .end(() => APPS.ok('specify the date in URL.'));
 
-// response to ROOT/alphabetical
+// Response to ROOT/alphabetical
 const alphabeticalBranch = APPS.Chain()
   .use(APPS.Cap, wotdAlphabetical)
   .end(() => APPS.ok('specify the words(separating with forward slashs) in URL')); // eslint-disable-line
 
-// response to ROOT/count
+// Response to ROOT/count
 function wotdCountBranch() {
   return root.child('word')
     .once('value')
@@ -235,7 +235,7 @@ function wotdCountBranch() {
     .catch(reason => APPS.ok(`Opps! Something is wrong : ${reason}`));
 }
 
-// response to ROOT/random
+// Response to ROOT/random
 function wotdRandomBranch() {
   return randomWOTD()
     .then(word => root.child(`word/${word}`).once('value'))
