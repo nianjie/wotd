@@ -1,13 +1,14 @@
 const HTTP = require('q-io/http');
 const APPS = require('q-io/http-apps');
 const fireAdmin = require('firebase-admin');
-
 const feedReader = require('./readfeed');
 
+const appConfig = require(process.env.DEV ? './.env/serviceAccount.json' : './firebase.account'); // eslint-disable-line 
 const firebaseApp = fireAdmin.initializeApp({
-  databaseURL: 'https://newwotd.firebaseio.com/',
-  credential: fireAdmin.credential.cert(require(process.env.DEV ? './.env/serviceAccount.json' : './firebase.account')), // eslint-disable-line
+  databaseURL: appConfig.databaseURL,
+  credential: fireAdmin.credential.cert(appConfig),
 });
+
 const root = firebaseApp.database().ref();
 
 const port = process.env.PORT || 0;
@@ -180,7 +181,6 @@ function wotdAlphabetical(req) {
   return Promise.all(all)
     .then(definitions => APPS.json(definitions));
 }
-
 
 function randomWOTD(counter = 0) {
   console.log(`randomWOTD start[${counter}].`);
