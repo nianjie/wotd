@@ -1,7 +1,7 @@
 {
   "name": "word-of-the-day",
   "description": "a tiny Node.js app providing tiny helps for foreign language learners like the author.",
-  "stack": "heroku-18",
+  "stack": "heroku-20",
   "scripts": {
   },
   "env": {
@@ -12,6 +12,9 @@
       "required": true
     },
     "FIRE_PKEY": {
+      "required": true
+    },
+    "FIRE_DBURL": {
       "required": true
     }
   },
