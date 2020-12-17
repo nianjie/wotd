@@ -5,7 +5,7 @@ const feedReader = require('./readfeed');
 
 const appConfig = require(process.env.DEV ? './.env/serviceAccount.json' : './firebase.account'); // eslint-disable-line 
 const firebaseApp = fireAdmin.initializeApp({
-  databaseURL: appConfig.databaseURL,
+  databaseURL: 'https://q8732.firebaseio.com',
   credential: fireAdmin.credential.cert(appConfig),
 });
 
