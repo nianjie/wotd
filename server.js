@@ -49,10 +49,6 @@ function wordOfTheDay(today = new Date()) {
     .then(word => APPS.json(word));
 }
 
-function wotd() {
-  return wordOfTheDay();
-}
-
 // complete date specified by URI if incompleted with default value,
 // then return it as a Date object.
 // dateURI always starts with '/'.
@@ -108,7 +104,7 @@ function wotdAllBranch() {
 // otherwise wotdChronological.
 const chronologicalBranch = APPS.Chain()
   .use(APPS.Cap, APPS.Branch({
-    today: wotd,
+    today: () => wordOfTheDay(),
   }, wotdChronological))
   .end(() => APPS.ok('specify the date in URL.'));
 
@@ -151,7 +147,7 @@ const wotdAPI = APPS.Chain()
     count: wotdCountBranch,
     random: wotdRandomBranch,
   }))
-  .end(wotd);
+  .end(() => wordOfTheDay());
 
 const app = APPS.Chain()
   .use(APPS.Log)
