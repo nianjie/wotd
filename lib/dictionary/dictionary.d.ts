@@ -20,6 +20,12 @@ export declare class Dictionary {
      */
     getWord(word: string): Promise<Word>;
     /**
+     * Get any word.
+     * This is implemented by randomly choosing one day in the past,
+     * then corresponding word is returned, which was saved on that day.
+     */
+    getAnyWord(): Promise<Word | null>;
+    /**
      * Get number of total words this dictionary has saved.
      */
     getWordCount(): Promise<any>;

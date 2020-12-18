@@ -20,10 +20,6 @@ function isWordOfTheDay(e, today) {
     && updatedday.getUTCDate() === today.getUTCDate();
 }
 
-function getRandomIntInclusive(min, max) {
-  return Math.floor(Math.random() * (max - min + 1)) + min; // The maximum is inclusive and the minimum is inclusive
-}
-
 function readFeedFrom(feedurl) {
   return feedReader.readFrom(feedurl)
     .then((xmlobj) => {
@@ -98,27 +94,6 @@ function wotdAlphabetical(req) {
     .then(definitions => APPS.json(definitions));
 }
 
-function randomWOTD(counter = 0) {
-  console.log(`randomWOTD start[${counter}].`);
-  if (counter > 10) {
-    throw new Error('random too many times.');
-  }
-  const today = new Date();
-  const year = getRandomIntInclusive(2017, today.getUTCFullYear());
-  const month = getRandomIntInclusive(0, today.getUTCMonth());
-  const day = getRandomIntInclusive(1, today.getUTCDate());
-  const randomDay = new Date(year, month, day);
-  console.log(`random day: ${randomDay}.`);
-  return oxfordDictionary.getWordOfTheDay(randomDay)
-    .then((word) => {
-      if (word) {
-        return word;
-      }
-      // recursively call randomWOTD till either exceed maximum rounds or find a location word being available
-      return randomWOTD(counter + 1);
-    });
-}
-
 // Response to ROOT/all
 function wotdAllBranch() {
   return APPS.ok('all is awesome.');
@@ -151,8 +126,7 @@ function wotdCountBranch() {
 
 // Response to ROOT/random
 function wotdRandomBranch() {
-  return randomWOTD()
-    .then(word => oxfordDictionary.getWord(word))
+  return oxfordDictionary.getAnyWord()
     .then(word => APPS.json(word))
     .catch(reason => APPS.ok(`Opps! Something is wrong : ${reason}`));
 }
