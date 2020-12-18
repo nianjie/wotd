@@ -187,7 +187,7 @@ const app = APPS.Chain()
   });
 
 const server = HTTP.Server(app);
-const port = process.env.DEV ? 8080 : 0;
+const port = process.env.PORT ? 80 : (process.env.DEV ? 8080 : 0); // eslint-disable-line
 
 server.listen(port).then((lserver) => {
   console.log(`Application is listening on port:${lserver.address().port}.`);
