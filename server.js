@@ -13,25 +13,15 @@ const firebaseApp = fireAdmin.initializeApp({
 const root = firebaseApp.database().ref();
 const oxfordDictionary = new wotdCore.Dictionary(root);
 
-function isWordOfTheDay(e, today) {
-  const updatedday = new Date(e.updated[0]);
-  return updatedday.getUTCFullYear() === today.getUTCFullYear()
-    && updatedday.getUTCMonth() === today.getUTCMonth()
-    && updatedday.getUTCDate() === today.getUTCDate();
-}
-
 function readFeedFrom(feedurl) {
   return feedReader.readFrom(feedurl)
     .then((xmlobj) => {
       const today = new Date();
       xmlobj.feed.entry.forEach((e) => {
         // save to the dictionary if word of the today
-        if (isWordOfTheDay(e, today)) {
-          const title = e.title[0];
-          const updated = e.updated[0];
-          const link = e['feedburner:origLink'][0];
-          const definition = title;
-          oxfordDictionary.createWordOfTheDay({title, definition, link, updated}); // eslint-disable-line
+        const word = wotdCore.Word.isWordOfTheDay(e, today);
+        if (word) {
+          oxfordDictionary.createWordOfTheDay(word);
         }
       });
     })

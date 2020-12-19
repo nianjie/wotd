@@ -1,3 +1,8 @@
+export interface OxfordEntry {
+    updated: string[];
+    title: string[];
+    [x: string]: string[];
+}
 export interface Word {
     title: string;
     definition: string;
@@ -6,4 +11,10 @@ export interface Word {
 }
 export declare class Word {
     constructor(worddata: Word);
+    /**
+     * If the specified entry is updated theday, a Word is returned.
+     * @param feedentry
+     * @param theday
+     */
+    static isWordOfTheDay(feedentry: OxfordEntry, theday?: Date): Word | null;
 }
