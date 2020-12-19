@@ -2,104 +2,26 @@ const HTTP = require('q-io/http');
 const APPS = require('q-io/http-apps');
 const fireAdmin = require('firebase-admin');
 const feedReader = require('./readfeed');
+const wotdCore = require('./lib/index');
 
-const appConfig = require(process.env.DEV ? './.env/serviceAccount.json' : './firebase.account'); // eslint-disable-line 
+const firebaseConfig = require(process.env.DEV ? './.env/serviceAccount.json' : './firebase.account'); // eslint-disable-line 
 const firebaseApp = fireAdmin.initializeApp({
-  databaseURL: appConfig.databaseURL,
-  credential: fireAdmin.credential.cert(appConfig),
+  databaseURL: firebaseConfig.databaseURL,
+  credential: fireAdmin.credential.cert(firebaseConfig),
 });
 
 const root = firebaseApp.database().ref();
+const oxfordDictionary = new wotdCore.Dictionary(root);
 
-const port = process.env.PORT || 0;
-
-function isWordOfTheDay(e, today) {
-  const updatedday = new Date(e.updated[0]);
-  return updatedday.getUTCFullYear() === today.getUTCFullYear()
-    && updatedday.getUTCMonth() === today.getUTCMonth()
-    && updatedday.getUTCDate() === today.getUTCDate();
-}
-
-function getRandomIntInclusive(min, max) {
-  return Math.floor(Math.random() * (max - min + 1)) + min; // The maximum is inclusive and the minimum is inclusive
-}
-
-//
-// schema B
-// WOTD
-//    |
-//    |-chronological
-//    |  |
-//    |  |-2017
-//    |  |    |
-//    |  |    |-0
-//    |  |    | |
-//    |  |    | |-1
-//    |  |    | | |-word A
-//    |  |    | |
-//    |  |    | |-2
-//    |  |    | | |-word B
-//    |  |    | |
-//    |  |    | |-...
-//    |  |    |   |-word C
-//    |  |    |
-//    |  |    |-1
-//    |  |    | |
-//    |  |    | |-1
-//    |  |    | | |-word D
-//    |  |    | |
-//    |  |    | |-...
-//    |  |    |    |-word E
-//    |  |    |
-//    |  |    |-+...
-//    |  |
-//    |  |-+2016
-//    |  |
-//    |  |-+20...
-//    |
-//    |-word
-//       |-word A
-//       |  |-definition:
-//       |  |-link:
-//       |  |-updated:
-//       |-word B
-//       |  |-definition:
-//       |  |-link:
-//       |  |-updated:
-//       |-word ...
-//          |-definition:
-//          |-link:
-//          |-updated:
-//
-// advantange/disadvantage of this structure:
-// +) easy to track down words by dates
-// +) give no chance to ignore word that has previously been appeared
-// -) need efforts to implement
 function readFeedFrom(feedurl) {
   return feedReader.readFrom(feedurl)
     .then((xmlobj) => {
-      // save to firebase under location of ROOT/year/month/date
       const today = new Date();
-      const location = `${today.getUTCFullYear()}/${today.getUTCMonth()}/${today.getUTCDate()}`; // eslint-disable-line
       xmlobj.feed.entry.forEach((e) => {
-        if (isWordOfTheDay(e, today)) {
-          // save the word under chronological
-          root.child(`chronological/${location}/`).set(`${e.title[0]}`);
-          // then save other detail attributes under word
-          root.child(`word/${e.title[0]}`).once('value')
-            .then((snap) => {
-              if (!snap.exists()) {
-                const updated = e.updated[0];
-                const link = e['feedburner:origLink'][0];
-                const definition = e.title[0];
-                const detail = {
-                  updated,
-                  link,
-                  definition,
-                };
-                snap.ref.set(detail);
-              }
-            });
+        // save to the dictionary if word of the today
+        const word = wotdCore.Word.isWordOfTheDay(e, today);
+        if (word) {
+          oxfordDictionary.createWordOfTheDay(word);
         }
       });
     })
@@ -109,33 +31,12 @@ function readFeedFrom(feedurl) {
 }
 
 /**
- * Fetch word of the day based on the strcture of Schema B.
+ * Fetch word of the day.
  * if no specific date is given, defual to today.
  */
 function wordOfTheDay(today = new Date()) {
-  // construct location upon date, where word is saved.
-  // however more details are saved under the location in which constructure the word self is part of.
-  const location = `${today.getUTCFullYear()}/${today.getUTCMonth()}/${today.getUTCDate()}`; // eslint-disable-line
-  return root.child(`chronological/${location}`)
-    .once('value')
-    .then(latestsnap => latestsnap.val())
-    .then((latest) => {
-      if (!latest) {
-        // deal with the case the latest word not exist yet,
-        // and if so null instead of exception is returned.
-        console.log(`No value saved under :${location}.`);
-        return null;
-      }
-      return root.child('word')
-        .child(latest)
-        .once('value')
-        .then(wordsnap => wordsnap.val());
-    })
+  return oxfordDictionary.getWordOfTheDay(today)
     .then(word => APPS.json(word));
-}
-
-function wotd() {
-  return wordOfTheDay();
 }
 
 // complete date specified by URI if incompleted with default value,
@@ -174,33 +75,9 @@ function wotdAlphabetical(req) {
     return acc;
   }, []);
   console.log(`requested words ${words}`);
-  const all = words.map(w => root.child('word')
-    .child(w)
-    .once('value')
-    .then(wordsnap => wordsnap.val()));
+  const all = words.map(w => oxfordDictionary.getWord(w));
   return Promise.all(all)
     .then(definitions => APPS.json(definitions));
-}
-
-function randomWOTD(counter = 0) {
-  console.log(`randomWOTD start[${counter}].`);
-  if (counter > 10) {
-    throw new Error('random too many times.');
-  }
-  const today = new Date();
-  const year = getRandomIntInclusive(2017, today.getUTCFullYear());
-  const month = getRandomIntInclusive(0, today.getUTCMonth());
-  const day = getRandomIntInclusive(1, today.getUTCDate());
-  const location = `${year}/${month}/${day}`;
-  console.log(`random access to ${location}.`);
-  return root.child(`chronological/${location}`)
-    .once('value')
-    .then((snap) => {
-      if (snap.exists()) {
-        return snap.val();
-      }
-      return randomWOTD(counter + 1); // recursively call randomWOTD till either exceed maximum rounds or find a location word being available
-    });
 }
 
 // Response to ROOT/all
@@ -217,7 +94,7 @@ function wotdAllBranch() {
 // otherwise wotdChronological.
 const chronologicalBranch = APPS.Chain()
   .use(APPS.Cap, APPS.Branch({
-    today: wotd,
+    today: () => wordOfTheDay(),
   }, wotdChronological))
   .end(() => APPS.ok('specify the date in URL.'));
 
@@ -228,18 +105,14 @@ const alphabeticalBranch = APPS.Chain()
 
 // Response to ROOT/count
 function wotdCountBranch() {
-  return root.child('word')
-    .once('value')
-    .then(snap => snap.numChildren())
+  return oxfordDictionary.getWordCount()
     .then(num => APPS.json(num))
     .catch(reason => APPS.ok(`Opps! Something is wrong : ${reason}`));
 }
 
 // Response to ROOT/random
 function wotdRandomBranch() {
-  return randomWOTD()
-    .then(word => root.child(`word/${word}`).once('value'))
-    .then(wordsnap => wordsnap.val())
+  return oxfordDictionary.getAnyWord()
     .then(word => APPS.json(word))
     .catch(reason => APPS.ok(`Opps! Something is wrong : ${reason}`));
 }
@@ -264,7 +137,7 @@ const wotdAPI = APPS.Chain()
     count: wotdCountBranch,
     random: wotdRandomBranch,
   }))
-  .end(wotd);
+  .end(() => wordOfTheDay());
 
 const app = APPS.Chain()
   .use(APPS.Log)
@@ -274,6 +147,7 @@ const app = APPS.Chain()
   });
 
 const server = HTTP.Server(app);
+const port = process.env.PORT ? process.env.PORT : (process.env.DEV ? 8080 : 0); // eslint-disable-line
 
 server.listen(port).then((lserver) => {
   console.log(`Application is listening on port:${lserver.address().port}.`);
