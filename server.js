@@ -2,7 +2,7 @@ const HTTP = require('q-io/http');
 const APPS = require('q-io/http-apps');
 const fireAdmin = require('firebase-admin');
 const feedReader = require('./readfeed');
-const wotdCore = require('./lib/index');
+const { Dictionary, Word } = require('./lib/index');
 
 const firebaseConfig = require(process.env.DEV ? './.env/serviceAccount.json' : './firebase.account'); // eslint-disable-line 
 const firebaseApp = fireAdmin.initializeApp({
@@ -11,32 +11,31 @@ const firebaseApp = fireAdmin.initializeApp({
 });
 
 const root = firebaseApp.database().ref();
-const oxfordDictionary = new wotdCore.Dictionary(root);
+const oxfordDictionary = new Dictionary(root);
 
-function readFeedFrom(feedurl) {
-  return feedReader.readFrom(feedurl)
-    .then((xmlobj) => {
-      const today = new Date();
-      xmlobj.feed.entry.forEach((e) => {
-        // save to the dictionary if word of the today
-        const word = wotdCore.Word.isWordOfTheDay(e, today);
-        if (word) {
-          oxfordDictionary.createWordOfTheDay(word);
-        }
-      });
-    })
-    .catch((reason) => {
-      console.log(`Reading rss feed faild. Because ${reason}`);
+async function readFeedFrom(feedurl) {
+  try {
+    const xmlobj = await feedReader.readFrom(feedurl);
+    const today = new Date();
+    xmlobj.feed.entry.forEach((e) => {
+      // save to the dictionary if word of the today
+      const word = Word.isWordOfTheDay(e, today);
+      if (word) {
+        oxfordDictionary.createWordOfTheDay(word);
+      }
     });
+  } catch (reason) {
+    console.log(`Reading rss feed faild. Because ${reason}`);
+  }
 }
 
 /**
  * Fetch word of the day.
  * if no specific date is given, defual to today.
  */
-function wordOfTheDay(today = new Date()) {
-  return oxfordDictionary.getWordOfTheDay(today)
-    .then(word => APPS.json(word));
+async function wordOfTheDay(today = new Date()) {
+  const word = await oxfordDictionary.getWordOfTheDay(today);
+  return APPS.json(word);
 }
 
 // complete date specified by URI if incompleted with default value,
@@ -66,18 +65,13 @@ function wotdChronological(req) {
   return wordOfTheDay(today);
 }
 
-function wotdAlphabetical(req) {
+async function wotdAlphabetical(req) {
   let words = req.pathInfo.split('/');
-  words = words.reduce((acc, w) => {
-    if (w.length > 0) { // exclude empty elements.
-      acc.push(w);
-    }
-    return acc;
-  }, []);
+  words = words.filter(w => w.length > 0);
   console.log(`requested words ${words}`);
   const all = words.map(w => oxfordDictionary.getWord(w));
-  return Promise.all(all)
-    .then(definitions => APPS.json(definitions));
+  const definitions = await Promise.all(all);
+  return APPS.json(definitions);
 }
 
 // Response to ROOT/all
@@ -104,17 +98,23 @@ const alphabeticalBranch = APPS.Chain()
   .end(() => APPS.ok('specify the words(separating with forward slashs) in URL')); // eslint-disable-line
 
 // Response to ROOT/count
-function wotdCountBranch() {
-  return oxfordDictionary.getWordCount()
-    .then(num => APPS.json(num))
-    .catch(reason => APPS.ok(`Opps! Something is wrong : ${reason}`));
+async function wotdCountBranch() {
+  try {
+    const num = await oxfordDictionary.getWordCount();
+    return APPS.json(num);
+  } catch (reason) {
+    return APPS.ok(`Opps! Something is wrong : ${reason}`);
+  }
 }
 
 // Response to ROOT/random
-function wotdRandomBranch() {
-  return oxfordDictionary.getAnyWord()
-    .then(word => APPS.json(word))
-    .catch(reason => APPS.ok(`Opps! Something is wrong : ${reason}`));
+async function wotdRandomBranch() {
+  try {
+    const word = await oxfordDictionary.getAnyWord();
+    return APPS.json(word);
+  } catch (reason) {
+    return APPS.ok(`Opps! Something is wrong : ${reason}`);
+  }
 }
 
 // By applying combination of Chain and Branch together,
