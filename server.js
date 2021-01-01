@@ -2,7 +2,7 @@ const HTTP = require('q-io/http');
 const APPS = require('q-io/http-apps');
 const fireAdmin = require('firebase-admin');
 const feedReader = require('./readfeed');
-const wotdCore = require('./lib/index');
+const { Dictionary, Word } = require('./lib/index');
 
 const firebaseConfig = require(process.env.DEV ? './.env/serviceAccount.json' : './firebase.account'); // eslint-disable-line 
 const firebaseApp = fireAdmin.initializeApp({
@@ -11,7 +11,7 @@ const firebaseApp = fireAdmin.initializeApp({
 });
 
 const root = firebaseApp.database().ref();
-const oxfordDictionary = new wotdCore.Dictionary(root);
+const oxfordDictionary = new Dictionary(root);
 
 function readFeedFrom(feedurl) {
   return feedReader.readFrom(feedurl)
@@ -19,7 +19,7 @@ function readFeedFrom(feedurl) {
       const today = new Date();
       xmlobj.feed.entry.forEach((e) => {
         // save to the dictionary if word of the today
-        const word = wotdCore.Word.isWordOfTheDay(e, today);
+        const word = Word.isWordOfTheDay(e, today);
         if (word) {
           oxfordDictionary.createWordOfTheDay(word);
         }
