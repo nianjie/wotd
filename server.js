@@ -67,9 +67,9 @@ function wotdChronological(req) {
 
 async function wotdAlphabetical(req) {
   let words = req.pathInfo.split('/');
-  words = words.filter(w => w.length > 0);
+  words = words.filter((w) => w.length > 0);
   console.log(`requested words ${words}`);
-  const all = words.map(w => oxfordDictionary.getWord(w));
+  const all = words.map((w) => oxfordDictionary.getWord(w));
   const definitions = await Promise.all(all);
   return APPS.json(definitions);
 }
