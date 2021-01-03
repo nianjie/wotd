@@ -3,8 +3,8 @@ const APPS = require('q-io/http-apps');
 const fireAdmin = require('firebase-admin');
 const feedReader = require('./readfeed');
 const { Dictionary, Word } = require('./lib/index');
+const firebaseConfig = require('./firebase.account');
 
-const firebaseConfig = require(process.env.DEV ? './.env/serviceAccount.json' : './firebase.account'); // eslint-disable-line 
 const firebaseApp = fireAdmin.initializeApp({
   databaseURL: firebaseConfig.databaseURL,
   credential: fireAdmin.credential.cert(firebaseConfig),
@@ -67,9 +67,9 @@ function wotdChronological(req) {
 
 async function wotdAlphabetical(req) {
   let words = req.pathInfo.split('/');
-  words = words.filter(w => w.length > 0);
+  words = words.filter((w) => w.length > 0);
   console.log(`requested words ${words}`);
-  const all = words.map(w => oxfordDictionary.getWord(w));
+  const all = words.map((w) => oxfordDictionary.getWord(w));
   const definitions = await Promise.all(all);
   return APPS.json(definitions);
 }
