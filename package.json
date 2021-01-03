@@ -4,10 +4,11 @@
   "description": "a tiny Node.js app providing tiny helps for foreign language learners like the author.",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
+    "start": "node -r dotenv/config server.js",
     "remote-debug": "node --inspect --debug-brk server.js"
   },
   "dependencies": {
+    "dotenv": "^8.2.0",
     "firebase-admin": "^9.4.2",
     "q-io": "^1.13.6",
     "xml2js": "^0.4.19"

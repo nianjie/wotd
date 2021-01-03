@@ -3,8 +3,8 @@ const APPS = require('q-io/http-apps');
 const fireAdmin = require('firebase-admin');
 const feedReader = require('./readfeed');
 const { Dictionary, Word } = require('./lib/index');
+const firebaseConfig = require('./firebase.account');
 
-const firebaseConfig = require(process.env.DEV ? './.env/serviceAccount.json' : './firebase.account'); // eslint-disable-line 
 const firebaseApp = fireAdmin.initializeApp({
   databaseURL: firebaseConfig.databaseURL,
   credential: fireAdmin.credential.cert(firebaseConfig),
