@@ -7,3 +7,15 @@
    2. NoSQL DB(Firebase)
  - Frontend
    1. WeChat(Alibaba Cloud)
+
+#### RESTful APIs
+```
+ROOT
+  |- wotd
+  |- alphabetical
+  |- chronological
+       |- YYYY/MM/DD
+       |- today
+  |- count
+  |- random
+```
