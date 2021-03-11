@@ -10,7 +10,7 @@ const readFeed = {
     // Wrapping as thenable so make it support promise functionality.
     return new Promise((resolve, reject) => {
       HTTP.request(feedurl)
-        .then(res => res.body.read())
+        .then((res) => res.body.read())
         .then((body) => {
           parser.parseString(body, (error, result) => {
             if (error) {
@@ -20,7 +20,7 @@ const readFeed = {
             }
           });
         })
-        .catch(reason => reject(reason));
+        .catch((reason) => reject(reason));
     });
   },
 };
