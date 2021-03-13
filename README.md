@@ -12,10 +12,10 @@
 ```
 ROOT
   |- wotd
-  |- alphabetical
-  |- chronological
-       |- YYYY/MM/DD
-       |- today
-  |- count
-  |- random
+     |- alphabetical
+     |- chronological
+        |- YYYY/MM/DD
+        |- today
+     |- count
+     |- random
 ```
