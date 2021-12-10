@@ -1,7 +1,7 @@
 export interface OxfordEntry {
     updated: string[];
     title: string[];
-    [x: string]: string[];
+    link: any[];
 }
 export interface Word {
     title: string;
