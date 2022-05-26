@@ -1,16 +1,17 @@
 const HTTP = require('q-io/http');
 const APPS = require('q-io/http-apps');
-const fireAdmin = require('firebase-admin');
+const { initializeApp, cert } = require('firebase-admin/app');
+const { getDatabase } = require('firebase-admin/database');
 const feedReader = require('./readfeed');
 const { Dictionary, Word } = require('./lib/index');
 const firebaseConfig = require('./firebase.account');
 
-const firebaseApp = fireAdmin.initializeApp({
+const firebaseApp = initializeApp({
   databaseURL: firebaseConfig.databaseURL,
-  credential: fireAdmin.credential.cert(firebaseConfig),
+  credential: cert(firebaseConfig),
 });
 
-const root = firebaseApp.database().ref();
+const root = getDatabase(firebaseApp).ref();
 const oxfordDictionary = new Dictionary(root);
 
 async function readFeedFrom(feedurl) {
