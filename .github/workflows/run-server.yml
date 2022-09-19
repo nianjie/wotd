@@ -25,5 +25,5 @@ jobs:
       env:
         FIRE_CEMAIL: ${{ secrets.FIRE_CEMAIL }}
         FIRE_DBURL: ${{ secrets.FIRE_DBURL }}
-        FIRE_PID: ${{ secretes.FIRE_PID }}
+        FIRE_PID: ${{ secrets.FIRE_PID }}
         FIRE_PKEY: ${{ secrets.FIRE_PKEY }}
