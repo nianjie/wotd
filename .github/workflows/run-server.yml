@@ -24,8 +24,7 @@ jobs:
     - run: npm ci
     - run: npm run build --if-present
     - run: echo Hello-${{ secrets.FIRE_CEMAIL }}, world.
-    - run: echo hello-${{ secrets.FIRE_PID }}-World.
-    # - run: node server.js
+    - run: node server.js
       env:
         FIRE_CEMAIL: ${{ secrets.FIRE_CEMAIL }}
         FIRE_DBURL: ${{ secrets.FIRE_DBURL }}
